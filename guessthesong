@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Song — BDAY WEEK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Setup & Theming */
+        :root {
+            --blush: #ffdde1;
+            --navy: #0f172a;
+            --pink: #f72585;
+            --purple: #7209b7;
+            --white: #ffffff;
+            --light-gray: #f8f9fa;
+            --gray: #6c757d;
+            --green: #2ecc71;
+            --orange: #f39c12;
+            --font-sans: 'Poppins', sans-serif;
+            --font-tamil: 'Noto Sans Tamil', sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--white);
+            background: linear-gradient(160deg, var(--navy) 0%, #3f375b 50%, #f77062 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Starry Background Effect */
+        #star-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background-color: var(--white);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+            opacity: 0;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 0.8; transform: scale(1); }
+        }
+
+        /* Main Container & Screens */
+        .container {
+            width: 100%;
+            max-width: 960px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            animation: fadeIn 0.7s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--blush);
+            text-shadow: 0 0 15px rgba(255, 221, 225, 0.5);
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            font-weight: 300;
+            max-width: 400px;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--pink);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(247, 37, 133, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(247, 37, 133, 0.6);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--blush);
+            border: 1px solid var(--blush);
+            box-shadow: none;
+            margin: 0.5rem;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--blush);
+            color: var(--navy);
+            box-shadow: none;
+        }
+        
+        .btn-home {
+            background: none;
+            border: none;
+            color: var(--blush);
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-home:hover {
+            opacity: 1;
+        }
+
+        /* Game Screen */
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--blush);
+        }
+        
+        #high-score {
+            text-align: left;
+        }
+
+        #round-counter {
+            text-align: right;
+        }
+
+        .lyric-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            width: 100%;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .lyric-label {
+            font-size: 0.9rem;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--blush);
+            margin-bottom: 1rem;
+        }
+
+        .lyric-text {
+            font-family: var(--font-tamil), var(--font-sans);
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            min-height: 240px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .hint-area {
+            font-size: 1rem;
+            min-height: 24px;
+            color: var(--green);
+            font-weight: 600;
+        }
+        
+        .hint-area.revealed {
+            color: var(--orange);
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 1rem;
+        }
+        
+        .answer-input {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            font-size: 1rem;
+            font-family: var(--font-sans);
+        }
+        
+        .answer-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--pink);
+            box-shadow: 0 0 10px rgba(247, 37, 133, 0.5);
+        }
+        
+        .input-group.shake .answer-input {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .action-buttons {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons .btn, .action-buttons .btn-secondary {
+            display: none;
+        }
+
+        /* End Screen */
+        .final-score-text {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .final-score {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--blush);
+            margin-bottom: 1.5rem;
+        }
+
+        .end-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .signature {
+            margin-top: 3rem;
+            font-family: 'Brush Script MT', 'Brush Script Std', 'cursive';
+            font-size: 1.5rem;
+            color: var(--blush);
+            opacity: 0.8;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            color: white;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+            z-index: 1000;
+            font-weight: 600;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -20px);
+        }
+        
+        .toast-success { background-color: var(--green); }
+        .toast-warning { background-color: var(--orange); }
+        .toast-info { background-color: var(--purple); }
+
+        /* Confetti Animation */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 999;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--pink);
+            opacity: 0;
+            animation: fall 3s linear forwards;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="star-container"></div>
+    <div id="confetti-container" class="confetti-container"></div>
+    
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <h1>Guess the Song 🎵</h1>
+            <h2>Ani, welcome to Day 2 of your Birthday Week! 🎉</h2>
+            <p>This is our special lyric game — a mix of your favorite songs, our memories, and a little challenge for you.<br><br>Get ready to guess, sing along, and maybe even laugh at my tricky picks. 😏</p>
+            <button id="start-btn" class="btn btn-cta">
+                Start the Game
+            </button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="scoreboard">
+                <button id="game-home-btn" class="btn-home">🏠 Home</button>
+                <div id="points-counter">Points: 0</div>
+                <div id="high-score-display"></div>
+                <div id="round-counter">Round 1 / 25</div>
+            </div>
+
+            <div class="lyric-card">
+                <div class="lyric-label">Lyric</div>
+                <div id="lyric-text" class="lyric-text"></div>
+                <div id="hint-area" class="hint-area"></div>
+            </div>
+
+            <div id="input-group" class="input-group">
+                <input type="text" id="answer-input" class="answer-input" placeholder="Type the song name...">
+                <button id="submit-btn" class="btn">Submit</button>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="reveal-btn" class="btn-secondary">Reveal Answer</button>
+                <button id="next-btn" class="btn">Next Round</button>
+            </div>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="screen">
+            <div id="end-title"></div>
+            <div class="final-score-text">You scored</div>
+            <div id="final-score" class="final-score"></div>
+            <p id="end-message" class="end-message"></p>
+            <div class="action-buttons" style="display:flex;">
+                <button id="play-again-btn" class="btn">Play Again</button>
+                <button id="home-btn" class="btn-secondary">Go to Home</button>
+                <button id="share-btn" class="btn-secondary">Share Score</button>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div id="toast" class="toast" aria-live="assertive"></div>
+    
+    <script>
+        // --- DOM ELEMENTS ---
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const startBtn = document.getElementById('start-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const revealBtn = document.getElementById('reveal-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const homeBtn = document.getElementById('home-btn');
+        const gameHomeBtn = document.getElementById('game-home-btn');
+        const shareBtn = document.getElementById('share-btn');
+        
+        const pointsCounter = document.getElementById('points-counter');
+        const highScoreDisplay = document.getElementById('high-score-display');
+        const roundCounter = document.getElementById('round-counter');
+        const lyricText = document.getElementById('lyric-text');
+        const hintArea = document.getElementById('hint-area');
+        const answerInput = document.getElementById('answer-input');
+        const inputGroup = document.getElementById('input-group');
+
+        const finalScoreDisplay = document.getElementById('final-score');
+        const endMessage = document.getElementById('end-message');
+        const endTitle = document.getElementById('end-title');
+
+        // --- GAME DATA ---
+        const roundsData = [
+            { lyric: "நீ பேசும் வார்த்தைகள் சேகரித்து<br>செய்வேன் அன்பே ஓர் அகராதி<br>நீ தூங்கும் நேரத்தில் தூங்காமல்<br>பார்ப்பேன் தினம் உன் தலைகோதி", answer: "Akkam pakkam" },
+            { lyric: "அதிகாலை விடிவதெல்லாம்<br>உன்னை பார்க்கும் மயக்கத்தில் தான்<br>அந்திமாலை மறைவதெல்லாம்<br>உன்னை பார்த்த கிரக்கத்தில்தான்", answer: "Kadhal vaithu" },
+            { lyric: "எதுவும் புரியா புது கவிதை<br>அர்த்தம் மொத்தம் இன்று அறிந்தேன்<br>கையை மீறும் ஒரு குடையாய்<br>காற்றோடுதான் நானும் பறந்தேன்<br>மழைக் காற்றோடுதான் நானும் பறந்தேன்", answer: "Mudhal mazhai" },
+            { lyric: "இதுவரை என்நெஞ்சில்<br>இல்லவே இல்லை பயங்கள்<br>இரண்டு நாள் பார்த்தேனே<br>மிரட்டுதே உந்தன் குணங்கள்", answer: "En idhayam" },
+            { lyric: "இதயம் முழுதும் இருக்கும் இந்த தயக்கம்<br>எங்கு கொண்டு நிறுத்தும்<br>இதை அறிய எங்கு கிடைக்கும் விளக்கம்<br>அது கிடைத்தால் சொல்ல வேண்டும் எனக்கும்", answer: "Pookal Pookum" },
+            { lyric: "நீ சென்றால் கூட வாசம் வீசும் வீசும் வீசும் வீசும்<br>என் அன்பே என் நாட்கள் என்றும் போல போகும் போகும் போகும் போகும்<br>என் உள்ளே என் உள்ளே<br>தன்னாலே காதல் கணம் கொண்டேன்", answer: "Dhimu dhimu" },
+            { lyric: "இரண்டும் கை கோர்த்து சேர்ந்தது<br>இடையில் பொய்பூட்டு போனது<br>வாசல் தல்லாடுதே<br>திண்டாடுதே கொண்டாடுதே", answer: "Oru padhi kadhavu" },
+            { lyric: "உன் தோளில் சாயும் போது<br>உற்சாகம் கொள்ளும் கண்கள்<br>நீ எங்கே எங்கே என்று<br>உன்னை தேடி தேடி பார்க்கிறது<br>உன்னோடு போகும் போது<br>பூ பூக்கும் சாலையாவும்<br>நீ எங்கே என்று என்னை கேட்ட பின்பு வாடிடுதே", answer: "Mazhai varum ariguri" },
+            { lyric: "கை வீசி காற்றில், நீ பேசும் அழகில், மெய்யாகும் பொய்யும்", answer: "Saayndhu Saayndhu" },
+            { lyric: "உன் கன்னம் மேலே<br>மழை நீரைப் போலே<br>முத்தக் கோலம் போட<br>ஆசை அள்ளாடுதே<br>நீ பேசும் பேச்சு<br>நாள்தோறும் கேட்டு<br>எந்தன் ஜென்மம் தீர<br>ஏக்கம் தள்ளாடுதே", answer: "Oh Penne" },
+            { lyric: "யார் எந்தன் வார்த்தை மீது மௌனம் வைத்தது<br>இன்று பேசாமல் கண்கள் பேசுது", answer: "Yaar Indha Saalai" },
+            { lyric: "நேசிக்கும் காலம் தான் வீணெண போகுமா<br>நினைவுகள் சேக்கிறேன் இங்கே<br>ஆயினும் காதலின் கைகளில்<br>விரும்பியே விழுகிறேன் அன்பே", answer: "Un Vizhigalil" },
+            { lyric: "பெண்களை நிமிர்ந்து பார்த்திட<br>உன் இனிய கண்ணியம் பிடிக்குதே<br>கண்களை நேரா பாத்து தான்<br>நீ பேசும் தோரணை பிடிக்குதே<br>தூரத்தில் நீ வந்தாலே<br>என் மனசில் மழையடிக்கும் மிகப்பிடித்த<br>பாடல் ஒன்றை உதடுகளும் முணுமுணுக்கும்", answer: "Ondra Renda" },
+            { lyric: "இன்னும் நூறு ஆண்டு நம் ஆயுள் வேணும்<br>கை ரேகையெல்லாம் தேஞ்சும் நம் ஆசை வாழும்<br>உன் அன்பு என்னும் பானம் என் உசிர் வர வேணும்<br>உன் மூச்சு காற்றில் நான் மூழ்கி மாய்ந்திட வேணும்<br>கண்கள் நான்கும் பார்த்தும் பார்வை ஒன்றே வேணும்", answer: "Kaalathukum Nee Venum" },
+            { lyric: "ஒரு புறம் நாணம் கிள்ளுதே<br>மறுபுறம் ஆசை தள்ளுதே<br>என்னை நானும் கேட்ப்பது<br>தடுமாற்றம் தாக்குது", answer: "Oru Manam" },
+            { lyric: "ஊஞ்சல் போல் தாலாட்டும்<br>தோளில் நான் சாய்ந்தாடும் நாளில்<br>ஏன் லேசாக நீ தேம்பினாய்", answer: "Uyir Urugudhey" },
+            { lyric: "காலை எழுந்ததும் என் கண்கள் முதலில்<br>தேடிப்பிடிப்பதுந்தன் முகமே<br>தூக்கம் வருகையில் கண் பார்க்கும் கடைசி<br>காட்சிக்குள் நிற்பதும் உன்முகமே", answer: "Paartha Mudhal Naale" },
+            { lyric: "கேட்டு ரசித்த பாடல் ஒன்றை<br>மீண்டும் இன்று ஞாபகம் தூண்ட<br>என்னை உன்னை எண்ணிதானோ<br>எழுதியது போலவே தோன்ற", answer: "Kelaamal" },
+            { lyric: "ஒரு சிறுவலி இருந்ததுவே<br>இதயத்திலே இதயத்திலே<br>உனது இருவிழி தடவியதால்<br>அமிழ்ந்துவிட்டேன் மயக்கத்திலே<br>உதிரட்டுமே உடலின் திரை<br>அதுதானே இனி நிலாவின் கரை கரை", answer: "Annul Maele" },
+            { lyric: "காற்றிலே ஆடும் காகிதம் நான்<br>நீதான் என்னை கடிதம் ஆக்கினாய்<br>அன்பில் தொடங்கி அன்போடு முடிக்கிறேன்<br>என் கலங்கரை விளக்கமே", answer: "Mannipaaya" },
+            { lyric: "ஒரு வீட்டில் நாம் இருந்து<br>ஓர் இலையில் நம் விருந்து<br>இரு தூக்கம் ஒரு கனவில்<br>மூழ்கி வாழ்க்கை தொடங்கும்<br>நான் சமையல் செய்திடுவேன்<br>நீ வந்து அணைத்திடுவாய்<br>என் பசியும் உன் பசியும்<br>சேர்ந்தே ஒன்றாய் அடங்கும்<br>நான் கேட்டு ஆசைபட்ட பாடல் நூறு<br>நீயும் நானும் சேர்ந்தே கேட்போம்<br>தாலாட்டை கண்ணில் சொன்ன ஆணும் நீ தான்<br>காலம் நேரம் தாண்டி வாழ்வோம்", answer: "Maalai Mangum Neram" },
+            { lyric: "இருப்பது ஒரு மனது<br>இதுவரை அது எனது<br>என்னைவிட்டு மெதுவாய் அது<br>போக கண்டேனே<br>இது ஒரு கனவு நிலை<br>கலைத்திட விரும்பவில்லை<br>கனவுக்குள் கனவாய் என்னை நானே கண்டேனே", answer: "Idhayathai Yedho Ondru" },
+            { lyric: "உன் போன்ற இளைஞனை மனம்<br>ஏற்காமல் மறுப்பதே பிழை<br>கண்டேன் உன் அலாதி தூய்மையை<br>என் கண் பார்த்து பேசும் பேராண்மையை", answer: "Visiri" },
+            { lyric: "ஊரெல்லாம் கண்மூடித் தூங்கும்<br>ஓசைகள் இல்லாத இரவே<br>நான் மட்டும் தூங்காமல்<br>ஏங்கி உன்போல காய்கின்றேன் நிலவே", answer: "Thalli Pogathey" },
+            { lyric: "என் அச்சம் ஆசை எல்லாமே<br>தள்ளி போகட்டும்<br>எந்தன் இன்பம் துன்பம்<br>எல்லாமே உன்னை சேரட்டும்", answer: "Neeyum Naanum" }
+        ];
+        const TOTAL_ROUNDS = roundsData.length;
+
+        // --- GAME STATE ---
+        let currentRound = 0;
+        let score = 0;
+        let roundRevealed = false;
+        let highScore = localStorage.getItem('guessTheSongHighScore') || 0;
+
+        // --- EVENT LISTENERS ---
+        startBtn.addEventListener('click', startGame);
+        submitBtn.addEventListener('click', handleSubmit);
+        answerInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                handleSubmit();
+            }
+        });
+        revealBtn.addEventListener('click', handleReveal);
+        nextBtn.addEventListener('click', nextRound);
+        playAgainBtn.addEventListener('click', () => location.reload()); // Simple reload to restart
+        homeBtn.addEventListener('click', goToHome);
+        gameHomeBtn.addEventListener('click', goToHome);
+        shareBtn.addEventListener('click', shareScore);
+
+        // --- GAME FLOW FUNCTIONS ---
+        function startGame() {
+            showScreen('game-screen');
+            updateHighScoreDisplay();
+            loadRound(currentRound);
+        }
+
+        function loadRound(roundIndex) {
+            if (roundIndex >= TOTAL_ROUNDS) {
+                endGame();
+                return;
+            }
+            roundRevealed = false;
+            const round = roundsData[roundIndex];
+            lyricText.innerHTML = round.lyric;
+            
+            // Adjust font size for the 21st song (index 20) which is longer
+            if (roundIndex === 20) {
+                lyricText.style.fontSize = '1.2rem'; 
+            } else {
+                lyricText.style.fontSize = '1.6rem'; // Reset to default
+            }
+
+            hintArea.textContent = '';
+            hintArea.classList.remove('revealed');
+            answerInput.value = '';
+            answerInput.disabled = false;
+            
+            roundCounter.textContent = `Round ${roundIndex + 1} / ${TOTAL_ROUNDS}`;
+            
+            // Reset button visibility
+            submitBtn.style.display = 'block';
+            answerInput.style.display = 'block';
+            revealBtn.style.display = 'inline-block';
+            nextBtn.style.display = 'none';
+        }
+        
+        function handleSubmit() {
+            const userAnswer = answerInput.value;
+            if (!userAnswer.trim()) return;
+
+            const correctAnswer = roundsData[currentRound].answer;
+
+            if (checkAnswer(userAnswer, correctAnswer)) {
+                handleCorrectAnswer();
+            } else {
+                handleIncorrectAnswer();
+            }
+        }
+        
+        function handleReveal() {
+            roundRevealed = true;
+            const correctAnswer = roundsData[currentRound].answer;
+            hintArea.textContent = `Answer: ${correctAnswer}`;
+            hintArea.classList.add('revealed');
+            showToast('Answer revealed!', 'info');
+            prepareForNextRound();
+        }
+
+        function nextRound() {
+            currentRound++;
+            loadRound(currentRound);
+        }
+        
+        function endGame() {
+            showScreen('end-screen');
+            finalScoreDisplay.textContent = `${score} / ${TOTAL_ROUNDS}`;
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('guessTheSongHighScore', highScore);
+                endTitle.textContent = 'New High Score! ✨';
+            } else {
+                 endTitle.textContent = 'Game Over!';
+            }
+
+            if (score === TOTAL_ROUNDS) {
+                endMessage.textContent = "Perfect score! You’re the best — happy BDAY WEEK!";
+                triggerConfetti(200);
+            } else if (score >= TOTAL_ROUNDS / 2) {
+                endMessage.textContent = "Great job! You know my heart (and my playlist).";
+            } else {
+                endMessage.textContent = "Good try! Wanna play again and beat your score?";
+            }
+        }
+
+        function goToHome() {
+            // Reset game state
+            currentRound = 0;
+            score = 0;
+            pointsCounter.textContent = `Points: ${score}`;
+            
+            // Go back to the welcome screen
+            showScreen('welcome-screen');
+        }
+
+        // --- ANSWER VALIDATION ---
+        function checkAnswer(userInput, correctSong) {
+            // Normalize function to handle case, spaces, and basic punctuation
+            const normalize = (str) => {
+                return str
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Remove diacritics
+            };
+
+            const normalizedInput = normalize(userInput);
+            const normalizedAnswer = normalize(correctSong);
+            
+            // Exact match
+            if (normalizedInput === normalizedAnswer) {
+                return true;
+            }
+
+            // Partial match: check if any word from the answer is in the input
+            const answerWords = normalizedAnswer.split(/\s+/).filter(word => word.length > 0);
+            return answerWords.some(word => normalizedInput.includes(word));
+        }
+
+        // --- UI FEEDBACK FUNCTIONS ---
+        function handleCorrectAnswer() {
+            if (!roundRevealed) {
+                score++;
+                pointsCounter.textContent = `Points: ${score}`;
+                showToast('Correct! +1', 'success');
+            } else {
+                showToast('Correct!', 'success');
+            }
+            triggerConfetti(50);
+            const correctAnswer = roundsData[currentRound].answer;
+            hintArea.textContent = `It was "${correctAnswer}"! You got it!`;
+            hintArea.classList.remove('revealed');
+            prepareForNextRound();
+        }
+        
+        function handleIncorrectAnswer() {
+            inputGroup.classList.add('shake');
+            showToast('Not quite — try again!', 'warning');
+            setTimeout(() => inputGroup.classList.remove('shake'), 500);
+        }
+        
+        function prepareForNextRound() {
+            answerInput.disabled = true;
+            submitBtn.style.display = 'none';
+            revealBtn.style.display = 'none';
+            nextBtn.style.display = 'inline-block';
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show toast-${type}`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateHighScoreDisplay() {
+            if(highScore > 0) {
+                 highScoreDisplay.textContent = `High Score: ${highScore}`;
+            }
+        }
+
+        async function shareScore() {
+            const shareText = `I scored ${score} / ${TOTAL_ROUNDS} on the "Guess the Song" BDAY WEEK game! ❤️`;
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Guess the Song!',
+                        text: shareText,
+                    });
+                    showToast('Score shared!', 'info');
+                } catch (err) {
+                    console.error('Share failed:', err);
+                    copyToClipboard(shareText);
+                }
+            } else {
+               copyToClipboard(shareText);
+            }
+        }
+
+        function copyToClipboard(text) {
+             navigator.clipboard.writeText(text).then(() => {
+                showToast('Score message copied to clipboard!', 'info');
+            }, (err) => {
+                showToast('Could not copy message.', 'warning');
+            });
+        }
+        
+        // --- DECORATIVE EFFECTS ---
+        function createStars() {
+            const container = document.getElementById('star-container');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 3;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(star);
+            }
+        }
+
+        function triggerConfetti(count) {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#f72585', '#7209b7', '#3a0ca3', '#4361ee', '#4cc9f0', '#ffdde1'];
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                if(Math.random() > 0.5) confetti.style.borderRadius = '50%';
+                container.appendChild(confetti);
+
+                setTimeout(() => {
+                    confetti.remove();
+                }, 3000);
+            }
+        }
+
+        // --- INITIALIZATION ---
+        createStars();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
